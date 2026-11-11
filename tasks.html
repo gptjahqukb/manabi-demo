@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>報告宿題サポート（発表用デモ）</title>
+<style>
+  /* 元サイト（risyulist）と同じ構造：ヘッダー → 緑の帯（h2） → タブ（#tub） → #main（スクーリング表 table1 ／ 報告宿題表 table2） → 戻る */
+  :root { --green: #6e9a63; --pale: #d5e2cc; --cell: #8fc4a8; --blue: #3c7fc4; --line: #c8c8c8; --ink: #444; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; color: var(--ink); background: #fff; font-size: 14px; }
+  a { color: #1a3fa0; }
+  .demo-note { background: #fff3cd; color: #6b5300; font-size: 12px; padding: 4px 12px; }
+
+  /* #header */
+  #header { border-top: 5px solid #4a2a7a; }
+  #header .youkoso { margin: 0; background: #dde9f6; padding: 12px 230px 12px 20px; font-weight: bold; font-size: 15px; text-align: right; }
+  #header h1 { margin: 0; padding: 6px 10px 18px; display: flex; align-items: center; gap: 18px; font-size: 40px; color: #222; }
+  #header h1 a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 18px; }
+  .logo-icon { width: 72px; height: 62px; border-radius: 8px; background: #2b5fd9; display: grid; place-items: center; flex: none; }
+
+  /* #contents_risyulist */
+  #contents { background: linear-gradient(180deg, #dbe7f3, #edf2f8 30%); padding-bottom: 20px; }
+  #contents h2 { margin: 0 0 14px; background: var(--green); padding: 14px 56px; display: flex; align-items: center; gap: 18px; color: #fff; font-size: 22px; font-weight: normal; letter-spacing: 2px; white-space: nowrap; }
+  #contents h2 p { margin: 0; background: #fff; color: var(--ink); padding: 6px 10px; font-size: 14px; letter-spacing: 0; }
+  #contents h2 .gakuseki { margin-right: 26px; }
+  #tub { list-style: none; margin: 0; padding: 0 0 0 26px; display: flex; }
+  #tub li { width: 190px; padding: 16px; text-align: center; font-weight: bold; font-size: 15px; }
+  #tub li.on { background: #fff; color: #333; }
+  #tub li.off { background: #8fb59a; }
+  #tub li.off a { color: #fff; text-decoration: none; }
+  #main { background: #fff; padding: 20px 0 30px; }
+  #main h3 { margin: 0 0 10px; background: var(--pale); color: var(--green); font-size: 22px; padding: 12px 60px; letter-spacing: 2px; font-weight: normal; }
+  #main h3.mt { margin-top: 40px; }
+  .inner { padding: 0 58px; }
+
+  /* アイコン説明（#icon_u1 / #icon_u2）：右向き矢印の白いラベルが横に並ぶ */
+  .icons { list-style: none; margin: 0 0 18px; padding: 4px; display: inline-flex; gap: 4px; background: #e6edf7; white-space: nowrap; }
+  .icons li { display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 30px 6px 10px; font-size: 14px; line-height: 1.5;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); }
+  .click { font-size: 20px; margin: 6px 0 14px; line-height: 1.6; }
+  .click .red { color: #d23a2a; font-weight: bold; }
+
+  /* 表：列の幅を固定して、文字がつぶれないようにする */
+  table { border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid var(--line); text-align: center; padding: 0; overflow: hidden; }
+  th[scope=row] { text-align: left; padding: 0 10px; font-weight: normal; width: 196px; white-space: nowrap; font-size: 14px; }
+  td.green { background: #f2f2f2; font-size: 15px; }
+  .table1 td { width: 40px; height: 30px; }
+  .table2 td { width: 50px; height: 50px; }
+  td.icon3 { background: var(--cell); }
+  td.go { cursor: pointer; }
+  td.go:hover { outline: 2px solid #f0a040; outline-offset: -2px; }
+  .cell2 { display: block; font-size: 13px; line-height: 1.1; color: #333; margin-top: 2px; letter-spacing: -.02em; }
+
+  /* アイコン（元は画像。デモでは図形で表現） */
+  .i-done { display: inline-block; width: 22px; height: 22px; line-height: 18px; border-radius: 50%; border: 2px solid var(--blue); color: var(--blue); background: #eaf3fc; font-size: 11px; font-weight: bold; text-align: center; vertical-align: middle; }
+  .i-lecture { display: inline-block; width: 32px; height: 20px; background: #2e7d5b; border: 2px solid #b8e0c8; position: relative; vertical-align: middle; }
+  .i-lecture::after { content: ""; position: absolute; left: 4px; bottom: 2px; width: 6px; height: 10px; background: #1b3b2b; border-radius: 3px 3px 0 0; }
+  .i-book { display: inline-block; width: 30px; height: 18px; background: #f4f4f4; border: 1px solid #888; position: relative; vertical-align: middle; }
+  .i-book::after { content: "✎"; position: absolute; right: -5px; top: -7px; color: #c2602a; font-size: 14px; line-height: 1; }
+  .i-before { display: inline-block; width: 50px; height: 30px; background: #f2cdbd; }
+  .i-re { display: inline-block; width: 32px; height: 20px; background: #a33; color: #fff; font-size: 11px; text-align: right; padding-right: 2px; line-height: 20px; }
+  .i-date { display: inline-block; font-size: 13px; line-height: 1.35; background: #4b6f86; color: #fff; padding: 1px 3px; text-align: center; }
+  .i-date em { display: block; font-style: normal; background: var(--cell); color: #333; }
+  .i-sq { display: inline-block; width: 40px; height: 40px; line-height: 40px; text-align: center; font-size: 20px; }
+  .i-study { background: #f2d896; } .i-grading { background: #7bb36b; } .i-review { background: #ddd; color: #c33; font-weight: bold; font-size: 15px; }
+
+  .foot { font-size: 20px; margin-top: 40px; }
+  .foot .b { color: #1f3fae; } .foot .r { color: #c33; }
+  #back { margin: 26px 20px 0; }
+  #back a { display: inline-block; background: #999; color: #fff; padding: 6px 18px; text-decoration: none; font-weight: bold; }
+  #footer { border-top: 1px solid #ccc; padding: 16px; text-align: center; color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+<div data-fit="1174">
+  <div class="demo-note">※ 発表用に作ったデモページです。実在のサービスではありません。</div>
+  <div id="header">
+    <p class="youkoso">ようこそ！生徒　太郎さん　（ID:0000000000）</p>
+    <h1><a href="index.html"><span class="logo-icon"><svg width="46" height="46" viewBox="0 0 46 46" fill="#fff"><circle cx="23" cy="11" r="8"/><path d="M8 40c0-9 7-15 15-15s15 6 15 15z"/><rect x="2" y="36" width="42" height="6" rx="1" fill="#fff" stroke="#2b5fd9"/></svg></span>まなびポータル</a></h1>
+  </div>
+
+  <div id="contents">
+    <h2>📝 報告宿題サポート<p><span class="gakuseki">学籍番号 <a href="#">0000000000</a></span><span>お名前　生徒　太郎さん</span></p></h2>
+    <ul id="tub"><li class="on">» 履修一覧</li><li class="off"><a href="#" id="scoreTab">» 成績一覧</a></li></ul>
+
+    <div id="main">
+      <h3>スクーリング</h3>
+      <div class="inner">
+        <ul class="icons">
+          <li><span class="i-before"></span>開講前</li>
+          <li><span class="i-lecture"></span>講義が受けられます</li>
+          <li><span class="i-re">Re</span>再受講してください</li>
+          <li><span class="i-done">済</span>受講済</li>
+        </ul>
+        <p class="click"><span class="i-done">済</span> のアイコンをクリックすれば、解答状況が表示されます。</p>
+        <table class="table1" id="table1"></table>
+      </div>
+
+      <h3 class="mt">報告宿題</h3>
+      <div class="inner">
+        <ul class="icons">
+          <li><span class="i-date">12/20<em>01/20</em></span>上段の日付が掲載予定日<br>下段の日付が提出締切日です</li>
+          <li><span class="i-book"></span>報告宿題の学習ができます<br>下段の日付が提出締切日です</li>
+          <li><span class="i-sq i-study">✎</span>学習中</li>
+          <li><span class="i-sq i-grading">🔍</span>採点中</li>
+          <li><span class="i-sq i-review">復</span>復習中</li>
+          <li><span class="i-done">済</span>提出済</li>
+        </ul>
+        <p class="click">掲載予定日が来ている課題で、教材が開かないものは準備中です。<br>
+          <span class="red">記述式問題がある場合、採点には２週間程度かかります。</span><br>
+          <span class="i-done">済</span> のアイコンをクリックすれば、解答状況が表示されます。</p>
+        <table class="table2" id="table2"></table>
+        <p class="foot"><span class="b">青色の済</span>はポータルで提出、<span class="r">赤色の済</span>はマークシート等で提出</p>
+      </div>
+    </div>
+    <p id="back"><a href="index.html">← 戻る</a></p>
+  </div>
+  <div id="footer">© まなびポータル（デモ）</div>
+</div>
+
+<script>
+  // 元のHTMLの並びをもとにしたデータ（科目名、スクーリングの受講済数・受講できる最後の回、報告宿題の提出済数・締切）
+  var subjects = [
+    { name: '文学国語',               school: [24, 24], report: [11, ['12/31']] },
+    { name: '日本史探究',             school: [18, 18], report: [9, []] },
+    { name: '政治・経済',             school: [12, 12], report: [6, []] },
+    { name: '物理基礎',               school: [12, 12], report: [6, []] },
+    { name: '体育Ⅲ',                 school: [6, 6],   report: [3, []] },
+    { name: '英語コミュニケーションⅢ', school: [24, 24], report: [12, []] },
+    { name: '論理・表現Ⅰ',            school: [12, 12], report: [6, []] }
+  ];
+  var DONE = '<span class="i-done">済</span>';
+
+  function head(n) {
+    var h = '<colgroup><col style="width:196px">';
+    for (var i = 0; i < n; i++) h += '<col>';
+    h += '</colgroup><tr><th scope="row">&nbsp;</th>';
+    for (var j = 1; j <= n; j++) h += '<td class="green">' + j + '</td>';
+    return h + '</tr>';
+  }
+
+  var t1 = head(24);
+  subjects.forEach(function (s, k) {
+    t1 += '<tr><th scope="row">' + s.name + '</th>';
+    for (var i = 1; i <= 24; i++) {
+      if (i <= s.school[0]) t1 += '<td class="icon1 go" data-done="' + k + '|' + i + '">' + DONE + '</td>';
+      else if (i <= s.school[1]) t1 += '<td class="icon3 go" data-href="page.html?t=lecture&s=' + k + '&n=' + i + '"><span class="i-lecture"></span></td>';
+      else t1 += '<td>&nbsp;</td>';
+    }
+    t1 += '</tr>';
+  });
+  document.getElementById('table1').innerHTML = t1;
+
+  var t2 = head(12);
+  subjects.forEach(function (s, k) {
+    t2 += '<tr><th scope="row">' + s.name + '</th>';
+    for (var i = 1; i <= 12; i++) {
+      var d = s.report[1][i - s.report[0] - 1];
+      if (i <= s.report[0]) t2 += '<td class="icon1 go" data-done="' + k + '|' + i + '">' + DONE + '</td>';
+      else if (d) t2 += '<td class="icon3 go" data-href="report.html?s=' + k + '&n=' + i + '"><span class="i-book"></span><span class="cell2">' + d + '</span></td>';
+      else t2 += '<td>&nbsp;</td>';
+    }
+    t2 += '</tr>';
+  });
+  document.getElementById('table2').innerHTML = t2;
+
+  // マスを押したときの動き（元サイトと同じ：済→点数を表示、緑のマス→講義・宿題のページへ）
+  document.addEventListener('click', function (e) {
+    var td = e.target.closest('td.go');
+    if (td) {
+      if (td.dataset.href) { location.href = td.dataset.href; return; }
+      var p = td.dataset.done.split('|');
+      demoAlert(subjects[p[0]].name + ' 第' + p[1] + '回\nWEBで受講済です。\n' + (70 + (p[1] * 7) % 31) + '点でした。（デモ）');
+    }
+    if (e.target.id === 'scoreTab') { e.preventDefault(); demoAlert('成績一覧はデモでは準備中です。'); }
+  });
+</script>
+<script src="dialog.js"></script>
+<script src="fit.js"></script>
+</body>
+</html>

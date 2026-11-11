@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>報告宿題（発表用デモ）</title>
+<style>
+  :root { --bar: linear-gradient(#4a4a4a, #222); --btn: linear-gradient(#7aa6d2, #4b78a8); --page: linear-gradient(#e2e2e2, #cfcfcf); }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; color: #222; background: #d0d0d0; }
+  .demo-note { background: #fff3cd; color: #6b5300; font-size: 12px; padding: 4px 12px; position: relative; z-index: 30; }
+  header { background: var(--bar); color: #fff; height: 56px; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 20; padding: 0 8px; }
+  header h1 { font-size: 18px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; text-shadow: 0 1px 0 #000; }
+  .hl, .hr { position: absolute; display: flex; gap: 6px; }
+  .hl { left: 8px; } .hr { right: 8px; }
+  .b { background: var(--btn); color: #fff; border: 1px solid #2d4f75; border-radius: 10px; padding: 8px 12px; font-size: 14px; font-weight: bold; cursor: pointer; text-shadow: 0 1px 0 #234; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .b.green { background: linear-gradient(#8fd06f, #4f9a35); border-color: #3b7a26; border-radius: 20px; padding: 10px 26px; font-size: 16px; }
+  .b.yellow { background: linear-gradient(#f6e27a, #e0b93a); border-color: #a88a20; color: #333; text-shadow: none; }
+  .b.white { background: linear-gradient(#fff, #eee); color: #333; border-color: #bbb; text-shadow: none; }
+  .b.wide { display: block; width: 100%; padding: 16px; font-size: 17px; border-radius: 24px; margin: 22px 0; }
+  footer { background: var(--bar); color: #fff; text-align: center; padding: 14px; font-size: 13px; font-weight: bold; }
+  .view { display: none; min-height: calc(100vh - 140px); }
+  .view.on { display: block; }
+  #top { background: var(--page); padding: 60px 16px; }
+  #top .menu { max-width: 30em; margin: 0 auto; }
+  #lesson { background: #fff; padding: 24px 20px 40px; }
+  #lesson h3 { font-size: 24px; margin: 0 0 12px; }
+  #lesson hr { border: 0; border-top: 2px solid #333; margin-bottom: 18px; }
+  .sheet { border: 1px solid #999; padding: 18px; line-height: 1.9; font-size: 15px; max-width: 760px; }
+  .sheet .lead { border: 2px solid #333; display: inline-block; padding: 2px 10px; font-weight: bold; margin-bottom: 10px; }
+  .sheet .q { margin: 14px 0; }
+  .sheet .q.now { background: #fff6c8; outline: 2px solid #f0c040; padding: 4px 6px; }
+  .box { display: inline-block; border: 1px solid #333; padding: 0 6px; margin: 0 2px; font-size: 12px; }
+  /* 右側の「解答入力」パネル */
+  .panel { position: fixed; top: 82px; bottom: 0; width: min(340px, 88vw); background: #f7f7f7; border: 1px solid #aaa; z-index: 15; overflow-y: auto; padding: 12px; transition: transform .25s; box-shadow: 0 0 12px rgba(0,0,0,.3); }
+  .panel.right { right: 0; transform: translateX(105%); }
+  .panel.left { left: 0; transform: translateX(-105%); background: #3b3b3b; color: #fff; }
+  .panel.open { transform: none; }
+  .close { display: flex; justify-content: space-between; align-items: center; font-size: 18px; padding: 8px 4px 12px; border-bottom: 1px solid #ccc; margin-bottom: 14px; cursor: pointer; }
+  .close span { width: 28px; height: 28px; border-radius: 50%; background: #888; color: #fff; display: grid; place-items: center; font-size: 16px; }
+  .ans select, .ans input, .ans textarea { width: 100%; font-size: 17px; padding: 10px; border: 1px solid #bbb; border-radius: 12px; background: #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,.15); }
+  .ans textarea { min-height: 8em; }
+  .rowbtn { display: flex; justify-content: space-between; margin: 14px 0; }
+  .center { text-align: center; margin: 10px 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #999; border: 1px solid #999; }
+  .grid a { aspect-ratio: 1; display: grid; place-items: center; color: #fff; font-size: 20px; font-weight: bold; text-decoration: underline; cursor: pointer; background: #e03a2a; }
+  .grid a.done { background: #2f5fbf; }
+  .grid a.cur { background: #4aa0d0; text-decoration: none; }
+  /* 解答確認 */
+  #confirm { background: var(--page); padding: 30px 16px; }
+  #confirm h2 { text-align: center; }
+  #amsg { text-align: center; color: #c00; font-weight: bold; min-height: 1.5em; }
+  .cgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-width: 760px; margin: 16px auto; }
+  .cgrid a { background: linear-gradient(#f2a48c, #d9533a); color: #fff; border-radius: 10px; padding: 12px 8px; display: flex; justify-content: space-between; font-weight: bold; cursor: pointer; min-width: 0; }
+  .cgrid a.done { background: var(--btn); }
+  .cgrid a span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 4px; }
+  .confirm-top { display: flex; justify-content: space-between; align-items: center; max-width: 760px; margin: 0 auto; gap: 12px; }
+  .result { max-width: 760px; margin: 20px auto; background: #fff; border-radius: 12px; padding: 16px; display: none; }
+  .result.on { display: block; }
+  .ng { color: #c00; } .ok { color: #1a7f37; }
+  [hidden] { display: none !important; }
+  .aiwarn { background: #fff4e5; border: 2px solid #f0a040; border-radius: 10px; padding: 12px 14px; margin-top: 12px; line-height: 1.8; }
+  @media (max-width: 560px) { header h1 { font-size: 14px; max-width: 30%; } .b { padding: 7px 8px; font-size: 12px; } }
+</style>
+</head>
+<body>
+<div class="demo-note">※ 発表用に作ったデモページです。実在のサービスではありません。問題は架空です。</div>
+
+<header>
+  <div class="hl" id="hl"></div>
+  <h1 id="title">報告宿題</h1>
+  <div class="hr" id="hr"></div>
+</header>
+
+<!-- 1. 最初のメニュー画面 -->
+<section class="view on" id="top">
+  <div class="menu">
+    <button class="b wide" onclick="go(0)">報告宿題　›</button>
+    <button class="b wide" onclick="location.href='tasks.html'">戻る（受講キャンセル）</button>
+  </div>
+</section>
+
+<!-- 2. 問題画面（解答番号ごと） -->
+<section class="view" id="lesson">
+  <h3 id="qno"></h3><hr>
+  <div class="sheet" id="sheet"></div>
+</section>
+
+<!-- 3. 解答確認画面 -->
+<section class="view" id="confirm">
+  <h2>解答確認</h2>
+  <div id="amsg"></div>
+  <div class="confirm-top">
+    <h3>本当に採点してよろしいですか？<br>よろしければ採点ボタンをクリックして下さい。</h3>
+    <button class="b yellow" id="saitenbtn" onclick="sendData()">採点</button>
+  </div>
+  <div class="cgrid" id="cgrid"></div>
+  <div class="result" id="result"></div>
+</section>
+
+<!-- 左：メニューのパネル -->
+<aside class="panel left" id="leftPanel">
+  <div class="close" onclick="closePanels()">閉じる <span>×</span></div>
+  <div class="center"><button class="b green" onclick="saveData()">保存して終了</button></div>
+  <div class="center"><button class="b yellow" onclick="go(-1)">解答一覧</button></div>
+  <div class="center"><button class="b white" onclick="location.href='tasks.html'">戻る</button></div>
+</aside>
+
+<!-- 右：解答入力のパネル -->
+<aside class="panel right" id="rightPanel">
+  <div class="close" onclick="closePanels()">閉じる <span>×</span></div>
+  <div class="ans" id="ansArea"></div>
+  <div class="rowbtn"><span id="prevBtn"></span><button class="b" onclick="next()">進む</button></div>
+  <div class="center"><button class="b green" onclick="saveData()">保存して終了</button></div>
+  <div class="grid" id="grid"></div>
+</aside>
+
+<footer>© まなびポータル（デモ）</footer>
+
+<script src="dialog.js"></script>
+<script>
+  // ---- 架空の問題（AIと教育についての小テスト・31問） ----
+  // type: select=選択肢, text=短い記述, long=50文字までの記述 ／ group=問題用紙の大問
+  var AIUE = ['ア', 'イ', 'ウ', 'エ'], AI = ['ア', 'イ'], AIU = ['ア', 'イ', 'ウ'];
+  var GROUPS = { 1: '一　AIのしくみ', 2: '二　生成AIのリスク', 3: '三　教育とAI', 4: '四　情報の確かめ方とルール' };
+  var Q = [
+    { g: 1, type: 'select', opts: AIUE, answer: 'ア', text: '問一　AIが大量のデータから規則性を見つけ出して学ぶことを何というか。<br>ア　機械学習　イ　暗号化　ウ　圧縮　エ　検索' },
+    { g: 1, type: 'text', answer: 'ネットワーク', text: '問二　人間の脳の神経細胞のつながりをまねた計算のしくみを「ニューラル <span class="box">2</span> 」という。カタカナで答えなさい。' },
+    { g: 1, type: 'select', opts: AIUE, answer: 'ア', text: '問三　文章や画像を新しく作り出すAIをまとめて何というか。<br>ア　生成AI　イ　産業用ロボット　ウ　電卓　エ　検索エンジン' },
+    { g: 1, type: 'select', opts: AIUE, answer: 'ア', text: '問四　大量の文章を学習し、次に来る言葉を予測して文章を作るしくみを何というか。<br>ア　大規模言語モデル　イ　表計算ソフト　ウ　オペレーティングシステム　エ　データベース' },
+    { g: 1, type: 'text', answer: 'プロンプト', text: '問五　AIに出す指示や質問の文のことをカタカナで何というか。' },
+    { g: 1, type: 'select', opts: AIUE, answer: 'ア', text: '問六　AIの学習データが古いときに起こりやすいこととして、最も適切なものを選びなさい。<br>ア　最近の出来事を正しく答えられない　イ　計算が速くなる　ウ　文字が大きくなる　エ　電池が長持ちする' },
+    { g: 1, type: 'select', opts: AI, answer: 'イ', text: '問七　「AIは人間と同じように意味を理解して考えている」という考えについて選びなさい。<br>ア　正しい　イ　正しいとはいえない' },
+    { g: 1, type: 'text', answer: '認識', text: '問八　AIが画像の中から人の顔や文字を見つけ出す技術を「画像 <span class="box">8</span> 」という。漢字二字で答えなさい。' },
+
+    { g: 2, type: 'select', opts: AIUE, answer: 'イ', text: '問九　生成AIが、事実ではない内容をもっともらしく答えてしまう現象を何というか。<br>ア　フィルターバブル　イ　ハルシネーション　ウ　ディープラーニング　エ　シンギュラリティ' },
+    { g: 2, type: 'text', answer: 'ディープフェイク', text: '問十　AIで作られた、本物そっくりの偽の動画や音声のことをカタカナで何というか。' },
+    { g: 2, type: 'select', opts: AIUE, answer: 'ア', text: '問十一　学習データの偏りによって、AIの判断が不公平になることを何というか。<br>ア　バイアス　イ　バックアップ　ウ　バージョン　エ　バッテリー' },
+    { g: 2, type: 'select', opts: AIUE, answer: 'イ', text: '問十二　生成AIに入力しないほうがよい情報を選びなさい。<br>ア　好きな食べ物の話題　イ　自分や友達の住所・電話番号　ウ　公開されている天気予報　エ　教科書の章の題名' },
+    { g: 2, type: 'select', opts: AIUE, answer: 'ア', text: '問十三　AIが自動で下した判断で問題が起きたとき、特に難しくなることを選びなさい。<br>ア　だれが責任を負うか　イ　画面の明るさ　ウ　通信の速さ　エ　文字の大きさ' },
+    { g: 2, type: 'text', answer: '著作', text: '問十四　他人が作った文章や画像を無断で使うと、 <span class="box">14</span> 権の侵害になることがある。漢字二字で答えなさい。' },
+    { g: 2, type: 'select', opts: AIU, answer: 'ア', text: '問十五　AIで大量に作られた詐欺メールの特徴として、最も適切なものを選びなさい。<br>ア　文章が自然で見分けにくい　イ　必ず誤字がある　ウ　送り主の本名が必ず書いてある' },
+    { g: 2, type: 'select', opts: AI, answer: 'イ', text: '問十六　「SNSで見た動画は、映像があるので本物だと判断してよい」。この文は正しいか。<br>ア　正しい　イ　誤り' },
+
+    { g: 3, type: 'select', opts: AIUE, answer: 'ア', text: '問十七　オンライン課題をAIや自動入力に丸投げしたときに起こる問題として、最も適切なものを選びなさい。<br>ア　理解が身につかないまま「提出済」になる　イ　必ず満点になる　ウ　先生がすぐに気づける　エ　学習時間が増える' },
+    { g: 3, type: 'select', opts: AIUE, answer: 'ア', text: '問十八　選択式の問題を自動で採点する仕組みの長所を選びなさい。<br>ア　すぐに結果がわかる　イ　記述を深く評価できる　ウ　不正を完全に防げる　エ　問題を自動で作れる' },
+    { g: 3, type: 'select', opts: AIUE, answer: 'イ', text: '問十九　一人ひとりの理解度に合わせて、出す問題を変える学習を何というか。<br>ア　一斉授業　イ　個別最適な学習　ウ　板書　エ　音読' },
+    { g: 3, type: 'text', answer: '確認', text: '問二十　AIの答えは「下書き」と考え、最後は人が <span class="box">20</span> することが大切である。漢字二字で答えなさい。' },
+    { g: 3, type: 'select', opts: AIUE, answer: 'ア', text: '問二十一　記述式の問題を自動で採点しにくい理由として、最も適切なものを選びなさい。<br>ア　正しい書き方が一つに決まらない　イ　文字が小さい　ウ　紙を使う　エ　時間がかからない' },
+    { g: 3, type: 'select', opts: AIUE, answer: 'イ', text: '問二十二　学習でのAIの使い方として、最も適切なものを選びなさい。<br>ア　答えを丸写しして提出する　イ　わからない部分の説明を求め、自分で解き直す　ウ　友達の分も解かせる　エ　テスト中に使う' },
+    { g: 3, type: 'select', opts: AI, answer: 'ア', text: '問二十三　「自動入力で提出された課題は、先生から見て本人が解いたかどうかわかりにくい」。この文は正しいか。<br>ア　正しい　イ　誤り' },
+    { g: 3, type: 'text', answer: '情報', text: '問二十四　成績や住所など、特定の人がわかるデータを「個人 <span class="box">24</span> 」という。漢字二字で答えなさい。' },
+
+    { g: 4, type: 'select', opts: AIUE, answer: 'ア', text: '問二十五　情報が正しいかを確かめる方法として、最も適切なものを選びなさい。<br>ア　複数の情報源で確かめる　イ　「いいね」の数で決める　ウ　最初に見たものを信じる　エ　見出しだけ読む' },
+    { g: 4, type: 'select', opts: AIUE, answer: 'ア', text: '問二十六　自分の好みに合う情報ばかりが表示され、見方が偏ってしまう状態を何というか。<br>ア　フィルターバブル　イ　ファイアウォール　ウ　フィッシング　エ　フォーマット' },
+    { g: 4, type: 'text', answer: 'リテラシー', text: '問二十七　情報を正しく読み解き、活用する力を「情報 <span class="box">27</span> 」という。カタカナで答えなさい。' },
+    { g: 4, type: 'select', opts: AIUE, answer: 'ア', text: '問二十八　EU（ヨーロッパ連合）で成立した、AIの利用を規制する法律を選びなさい。<br>ア　AI法　イ　道路交通法　ウ　消防法　エ　食品衛生法' },
+    { g: 4, type: 'select', opts: AIU, answer: 'ア', text: '問二十九　お金・健康・人の評価など大事な判断について、最も適切なものを選びなさい。<br>ア　AIに任せきりにせず人が最後に決める　イ　AIに完全に任せる　ウ　くじで決める' },
+    { g: 4, type: 'select', opts: AI, answer: 'ア', text: '問三十　「AIを使うときは、学校や先生が決めたルールを確認する」。この文は正しいか。<br>ア　正しい　イ　誤り' },
+    { g: 4, type: 'long', answer: null, text: '問三十一　あなたは、学校の課題でAIをどのように使うべきだと考えるか。五十字以内で書きなさい。（記述式・採点対象外）' }
+  ];
+
+  var subjects = ['文学国語', '日本史探究', '政治・経済', '物理基礎', '体育Ⅲ', '英語コミュニケーションⅢ', '論理・表現Ⅰ'];
+  var qs = new URLSearchParams(location.search);
+  var TITLE = '報告宿題　' + (subjects[qs.get('s')] || 'デモ') + '　第' + (qs.get('n') || '1') + '回';
+  var KEY = 'demo-report-v2-' + (qs.get('s') || 0) + '-' + (qs.get('n') || 1);
+  var cur = -2; // -2=メニュー, -1=解答確認, 0〜=問題
+
+  // 外付けのAIブックマークレット（presentation/tools/demo-ai-bookmarklet.md）が入力したときに true になる
+  var aiUsed = false;
+  var inputs = [];
+
+  document.getElementById('title').textContent = TITLE;
+  document.title = TITLE + '（発表用デモ）';
+
+  function $(id) { return document.getElementById(id); }
+  function val(i) { return (inputs[i].value || '').trim(); }
+
+  // 元サイトと同じく、全問分の解答欄を最初から作っておく（表示するのは今の問題だけ）
+  // id="select-native-番号" / name="select-ans-番号" も元サイトに合わせている
+  (function buildInputs() {
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+    Q.forEach(function (q, i) {
+      var wrap = document.createElement('div');
+      wrap.className = 'one'; wrap.hidden = true;
+      wrap.appendChild(document.createTextNode((i + 1) + '.'));
+      var el;
+      if (q.type === 'select') {
+        el = document.createElement('select');
+        [''].concat(q.opts).forEach(function (o) {
+          var op = document.createElement('option'); op.value = o; op.textContent = o; el.appendChild(op);
+        });
+      } else if (q.type === 'text') {
+        el = document.createElement('input'); el.type = 'text'; el.maxLength = 127;
+      } else {
+        el = document.createElement('textarea'); el.maxLength = 50; el.placeholder = '50文字まで';
+      }
+      el.id = 'select-native-' + i; el.name = 'select-ans-' + i;
+      el.value = saved[i] || '';
+      el.addEventListener('change', function () { drawGrid(); if (cur === -1) drawConfirm(); });
+      el.addEventListener('input', drawGrid);
+      wrap.appendChild(el);
+      $('ansArea').appendChild(wrap);
+      inputs.push(el);
+    });
+  })();
+
+  function show(id) { ['top', 'lesson', 'confirm'].forEach(function (v) { $(v).classList.toggle('on', v === id); }); }
+  function closePanels() { $('leftPanel').classList.remove('open'); $('rightPanel').classList.remove('open'); }
+  function btn(label, fn, cls) {
+    var b = document.createElement('button');
+    b.className = 'b ' + (cls || ''); b.textContent = label; b.onclick = fn; return b;
+  }
+
+  function go(i) {
+    closePanels();
+    cur = i;
+    var hl = $('hl'), hr = $('hr');
+    hl.innerHTML = ''; hr.innerHTML = '';
+    hl.appendChild(btn('‹ メニュー', function () { $('leftPanel').classList.add('open'); }));
+    if (i === -1) {
+      show('confirm');
+      hl.appendChild(btn('戻る', function () { go(Q.length - 1); }));
+      drawConfirm();
+      return;
+    }
+    show('lesson');
+    if (i > 0) hl.appendChild(btn('戻る', function () { go(i - 1); }));
+    hr.appendChild(btn('進む', next));
+    hr.appendChild(btn('解答入力 ›', function () { $('rightPanel').classList.add('open'); }));
+    $('qno').textContent = '解答番号 ' + (i + 1);
+    drawSheet(i);
+    inputs.forEach(function (el, k) { el.parentNode.hidden = k !== i; });
+    var p = $('prevBtn'); p.innerHTML = '';
+    if (i > 0) p.appendChild(btn('戻る', function () { go(i - 1); }));
+    drawGrid();
+    $('rightPanel').classList.add('open');
+    window.scrollTo(0, 0);
+  }
+  function next() { go(cur + 1 < Q.length ? cur + 1 : -1); }
+
+  // 問題用紙（同じ大問の問題を1枚にまとめ、今の問題を黄色く強調）
+  function drawSheet(i) {
+    var g = Q[i].g, html = '<div class="lead">報告宿題　AIと教育（デモ）</div><div><b>' + GROUPS[g] + '</b></div>';
+    Q.forEach(function (q, k) {
+      if (q.g === g) html += '<div class="q' + (k === i ? ' now' : '') + '" id="q' + k + '">' + q.text + '　<span class="box">解答番号 ' + (k + 1) + '</span></div>';
+    });
+    $('sheet').innerHTML = html;
+    var now = $('q' + i); if (now && now.scrollIntoView && i > 0) now.scrollIntoView({ block: 'center' });
+  }
+
+  // 番号の表（赤＝未解答、青＝解答済み、水色＝今の問題）
+  function drawGrid() {
+    var g = $('grid'); g.innerHTML = '';
+    Q.forEach(function (q, k) {
+      var a = document.createElement('a');
+      a.textContent = k + 1;
+      a.className = k === cur ? 'cur' : (val(k) ? 'done' : '');
+      a.onclick = function () { go(k); };
+      g.appendChild(a);
+    });
+  }
+
+  function drawConfirm() {
+    var c = $('cgrid'); c.innerHTML = '';
+    Q.forEach(function (q, k) {
+      var a = document.createElement('a');
+      a.className = val(k) ? 'done' : '';
+      a.innerHTML = '<span>' + (k + 1) + '</span><span></span>';
+      a.lastChild.textContent = val(k);
+      a.onclick = function () { go(k); };
+      c.appendChild(a);
+    });
+  }
+
+  function unanswered() { return Q.filter(function (q, k) { return !val(k); }).length; }
+
+  function saveData() {
+    demoConfirm('保存して終了します。よろしいですか？', function () {
+      var data = {};
+      inputs.forEach(function (el, k) { if (val(k)) data[k] = val(k); });
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+      location.href = 'tasks.html';
+    });
+  }
+
+  // 採点（デモなので、この画面の中で結果を出すだけ。どこにも送信しない）
+  function sendData() {
+    demoConfirm(unanswered() ? '未解答がありますが採点しますか？' : '採点をしてよろしいですか？', grade);
+  }
+  function grade() {
+    $('saitenbtn').disabled = true;
+    $('amsg').textContent = '現在採点中です。画面は消さないでください';
+    setTimeout(function () {
+      var total = 0, ok = 0, rows = '';
+      Q.forEach(function (q, k) {
+        if (!q.answer) { rows += '<li>' + (k + 1) + '：記述式（先生が採点します）</li>'; return; }
+        total++;
+        var right = val(k).normalize('NFKC') === q.answer.normalize('NFKC');
+        if (right) ok++;
+        rows += '<li class="' + (right ? 'ok' : 'ng') + '">' + (k + 1) + '：' + (right ? '○' : '×　正解は「' + q.answer + '」') + '</li>';
+      });
+      $('amsg').textContent = '';
+      var warn = '';
+      if (aiUsed) {
+        warn = '<div class="aiwarn"><b>AIが解いた結果です。</b>本人は問題を1問も読んでいません。<br>' +
+          '記述の答えもAIが書いたもので、本人の考えではありません。<br>それでも、この宿題は「提出済」として記録されます。</div>';
+      }
+      $('result').innerHTML = '<h3>採点結果：' + Math.round(ok / total * 100) + '点（' + ok + '／' + total + '問）</h3>' + warn + '<ul>' + rows + '</ul>' +
+        '<p>※ これは発表用のデモです。結果はどこにも送信されません。</p>';
+      $('result').classList.add('on');
+      try { localStorage.removeItem(KEY); } catch (e) {}
+    }, 1200);
+  }
+</script>
+<script src="fit.js"></script>
+</body>
+</html>

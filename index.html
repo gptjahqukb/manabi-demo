@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>まなびポータル デモ</title>
+<style>
+  :root {
+    --line: #4a2a7a; --head-bg: #dde9f6; --panel: #fff; --panel-border: #c9d6e6;
+    --tag-green: #5b8f4e; --tag-orange: #e07b39; --tag-navy: #1f3f8a;
+    --link: #1a3fa0; --text: #333;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; color: var(--text); background: #fff; }
+  .topline { height: 5px; background: var(--line); }
+  .wrap { max-width: 870px; }
+  .welcome { background: var(--head-bg); padding: 14px 20px; font-weight: bold; font-size: 15px; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 18px 10px; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 18px; }
+  .logo-icon { width: 72px; height: 62px; border-radius: 8px; background: #2b5fd9; display: grid; place-items: center; }
+  .logo h1 { margin: 0; font-size: 40px; letter-spacing: 1px; }
+  .head-btns { display: flex; gap: 6px; }
+  .btn { padding: 7px 14px; color: #fff; font-size: 14px; text-decoration: none; }
+  .btn.green { background: #6cb257; } .btn.gray { background: #9a9a9a; }
+  main { background: linear-gradient(180deg, #cfe0f2, #e7eff8 40%, #d7e5f3); padding: 12px 14px 30px; }
+  .row { display: grid; gap: 18px; }
+  .row.top { grid-template-columns: 1fr 1.6fr; }
+  .row.bottom { grid-template-columns: 1.8fr 1fr; margin-top: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--panel-border); padding: 34px 14px 14px; position: relative; min-height: 120px; }
+  .tag { position: absolute; top: -2px; left: -2px; color: #fff; font-size: 14px; font-weight: bold; padding: 4px 10px; }
+  .tag.green { background: var(--tag-green); } .tag.orange { background: var(--tag-orange); } .tag.navy { background: var(--tag-navy); }
+  .notice { font-size: 13px; line-height: 1.6; padding: 6px 0 12px 12px; border-bottom: 1px dotted #bbb; position: relative; }
+  .notice::before { content: "!"; position: absolute; left: 0; color: #6cb257; font-weight: bold; }
+  .news dt { font-size: 13px; color: #555; margin-top: 6px; }
+  .news dd { margin: 0; padding-bottom: 4px; border-bottom: 1px solid #ddd; font-size: 13px; }
+  a { color: var(--link); }
+  .see-all { position: absolute; top: 8px; left: 190px; font-size: 12px; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tile { display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; font-weight: bold; border-radius: 3px; min-height: 150px; }
+  .tile.report { grid-row: span 2; background: #e3a04f; color: #5a3410; font-size: 22px; border: 1px solid #c9822f; }
+  .tile.library { background: #fff; border: 2px solid #6cb257; color: #333; font-family: serif; font-size: 30px; }
+  .tile.study { background: #f0a0a0; color: #fff; font-size: 30px; border: 1px solid #d98585; }
+  .updated { text-align: right; font-size: 12px; margin-top: 4px; } .updated b { color: #5b8f4e; font-weight: normal; }
+  .small { font-size: 13px; line-height: 1.6; }
+  .menu a { display: block; margin: 4px 0; padding: 4px 8px; background: #eee; border: 1px solid #ccc; font-size: 14px; font-weight: bold; color: #333; text-decoration: none; }
+  .menu a.hl { background: #f7f7b0; text-align: center; }
+  .menu a::before, .arrow::before { content: "➔ "; color: var(--tag-navy); }
+  footer { border-top: 1px solid #ccc; margin-top: 40px; padding: 20px; text-align: center; color: #555; }
+  .demo-note { background: #fff3cd; color: #6b5300; font-size: 12px; padding: 6px 12px; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 10; align-items: flex-start; justify-content: center; padding-top: 80px; }
+  .overlay.open { display: flex; }
+  .modal { background: #fff; width: min(480px, calc(100vw - 32px)); padding: 24px; position: relative; font-size: 14px; }
+  .modal h3 { margin: 0 0 14px; font-size: 17px; border-left: 5px solid #1f3f8a; padding-left: 8px; }
+  .modal table { width: 100%; border-collapse: collapse; }
+  .modal th { text-align: left; width: 38%; padding: 8px 4px; background: #f3f6fa; font-weight: normal; }
+  .modal td { padding: 8px 4px; }
+  .modal input[type=text], .modal input[type=password] { padding: 4px; }
+  .modal .send { display: block; margin: 18px auto 0; padding: 8px 40px; background: #1f3f8a; color: #fff; border: 0; font-size: 15px; cursor: pointer; }
+  .modal .close { position: absolute; top: 8px; right: 12px; border: 0; background: none; font-size: 22px; cursor: pointer; }
+  .hint { font-size: 12px; color: #666; }
+  body { overflow-x: hidden; }
+  #fit { white-space: normal; }
+</style>
+<div id="fit" data-fit="950">
+<div class="demo-note">※ 発表用に作ったデモページです。実在のサービスではありません。</div>
+<div class="topline"></div>
+<div class="wrap">
+  <div class="welcome">ようこそ！生徒　太郎さん　（ID:0000000000）</div>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="#fff"><circle cx="23" cy="11" r="8"/><path d="M8 40c0-9 7-15 15-15s15 6 15 15z"/><rect x="2" y="36" width="42" height="6" rx="1" fill="#fff" stroke="#2b5fd9"/></svg>
+      </div>
+      <h1>まなびポータル</h1>
+    </div>
+    <div class="head-btns"><a class="btn green" href="#" data-modal="m-contact">連絡先の変更</a><a class="btn gray" href="#">➔ ログアウト</a></div>
+  </header>
+  <main>
+    <div class="row top">
+      <section class="panel">
+        <span class="tag green">ポータルからのお知らせ</span>
+        <div class="notice">Mac OSで動画が視聴できない場合、Google Chromeで閲覧してください</div>
+        <div class="notice">2026/11/20（金）19:00〜21:00は定期サーバーメンテナンスのため、利用ができません。</div>
+      </section>
+      <section class="panel">
+        <span class="tag green">学校からのお知らせ</span>
+        <a class="see-all arrow" href="#">すべて見る</a>
+        <dl class="news">
+          <dt>2026/11/1</dt><dd><a href="#">11月新刊購入のお知らせ！</a></dd>
+          <dt>2026/10/30</dt><dd><a href="#">2026年度活動報告会 報告動画作成について</a></dd>
+          <dt>2026/10/16</dt><dd><a href="#">2027年度 推薦WEBガイド</a></dd>
+          <dt>2026/9/11</dt><dd><a href="#">悩みを抱えている人へ</a></dd>
+          <dt>2025/10/2</dt><dd><a href="#">高校講座視聴について</a></dd>
+        </dl>
+      </section>
+    </div>
+    <div class="row bottom">
+      <section class="panel">
+        <span class="tag orange">ただいま授業中！</span>
+        <div class="tiles">
+          <a class="tile report" href="tasks.html">📝 報告宿題<br>サポート ➔</a>
+          <a class="tile library" href="#">Library</a>
+          <a class="tile study" href="#">📚 Study<sup>+</sup> ➔</a>
+        </div>
+        <div class="updated"><b>New!</b>　2026年10月16日更新</div>
+      </section>
+      <div style="display:grid;gap:16px;align-content:start">
+        <section class="panel">
+          <span class="tag navy">先生への相談コーナー</span>
+          <div class="small">学校のこと、進路のことなど先生に相談したいこと、聞いてみたいことがある方はこちらから</div>
+          <a class="small arrow" href="#">先生へメールする</a>
+        </section>
+        <section class="panel menu">
+          <span class="tag navy">ポータルの利用について</span>
+          <a class="hl" href="#">アンケート</a>
+          <a href="#">利用マニュアルを見る</a>
+          <a href="#" data-modal="m-pw">パスワードを変更する</a>
+          <a href="#">よくある質問を見る</a>
+          <a href="#">利用についての質問をする</a>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- パスワード変更（元サイトのモーダルと同じ流れ：入力チェック → 送信） -->
+<div class="overlay" id="m-pw"><form class="modal" onsubmit="return checkPw()">
+  <button type="button" class="close" aria-label="閉じる">×</button>
+  <h3>パスワードを変更する</h3>
+  <table>
+    <tr><th>ログイン名</th><td>0000000000</td></tr>
+    <tr><th>旧パスワード</th><td><input type="password" id="po" autocomplete="off"></td></tr>
+    <tr><th>新パスワード</th><td><input type="password" id="pn1" autocomplete="off"></td></tr>
+    <tr><th>新パスワード（確認）</th><td><input type="password" id="pn2" autocomplete="off"></td></tr>
+    <tr><td colspan="2"><label><input type="checkbox" id="showpwd"> パスワードを表示</label></td></tr>
+  </table>
+  <p class="hint">半角英数を最低1文字ずつ含めた8文字以上</p>
+  <button class="send">変更する</button>
+</form></div>
+
+<!-- 連絡先の変更 -->
+<div class="overlay" id="m-contact"><form class="modal" onsubmit="return checkContact()">
+  <button type="button" class="close" aria-label="閉じる">×</button>
+  <h3>連絡先の変更</h3>
+  <table>
+    <tr><th>緊急時 電話番号</th><td><input type="text" id="mob1" size="3" maxlength="4"> － <input type="text" id="mob2" size="3" maxlength="4"> － <input type="text" id="mob3" size="3" maxlength="4"><div class="hint">※半角で入力して下さい</div></td></tr>
+    <tr><th>メールアドレス1</th><td><input type="text" id="mail1" size="10">@<input type="text" id="mail2" size="10"></td></tr>
+    <tr><th>メールアドレス2</th><td><input type="text" id="mail3" size="10">@<input type="text" id="mail4" size="10"></td></tr>
+  </table>
+  <button class="send">変更する</button>
+</form></div>
+
+<script src="dialog.js"></script>
+<script>
+  // デモなので、どこにも送信しません（チェックが通ったらメッセージを出すだけ）
+  function $(id) { return document.getElementById(id); }
+  document.querySelectorAll('[data-modal]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); $(a.dataset.modal).classList.add('open'); });
+  });
+  document.querySelectorAll('.overlay').forEach(function (o) {
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.classList.contains('close')) o.classList.remove('open'); });
+  });
+  $('showpwd').addEventListener('change', function () {
+    ['po', 'pn1', 'pn2'].forEach(function (id) { $(id).type = $('showpwd').checked ? 'text' : 'password'; });
+  });
+
+  function checkPw() {
+    var po = $('po').value, n1 = $('pn1').value, n2 = $('pn2').value;
+    var msg = !po ? '旧パスワードを入力して下さい。'
+      : !n1 ? '新パスワードを入力して下さい。'
+      : !n2 ? '新パスワード(確認用)を入力して下さい。'
+      : n1 !== n2 ? '新パスワード(確認用)は２箇所同じ内容を入力して下さい。'
+      : !(/[0-9]/.test(n1) && /[a-zA-Z]/.test(n1) && n1.length >= 8) ? '半角英数を最低１文字ずつ含めた８文字以上で指定してください。'
+      : n1 === po ? '新パスワードは旧パスワードと違うものを入力して下さい。'
+      : '';
+    demoAlert(msg || '（デモ）パスワードを変更しました。');
+    if (!msg) $('m-pw').classList.remove('open');
+    return false;
+  }
+
+  function checkMail(user, domain, label) {
+    if (!user && !domain) return '';
+    if (!user || !domain) return label + 'で未入力の項目があります。';
+    if (domain.indexOf('.') < 0 || /-$/.test(user) || /^\.|\.$|\.\./.test(user)) return label + 'を見直して下さい。';
+    return '';
+  }
+  function checkContact() {
+    var tel = $('mob1').value + $('mob2').value + $('mob3').value;
+    var all = tel + $('mail1').value + $('mail2').value + $('mail3').value + $('mail4').value;
+    var msg = !/^[\x20-\x7e]*$/.test(all) ? '電話番号・メールアドレスは半角で入力してください。'
+      : checkMail($('mail1').value, $('mail2').value, 'メールアドレス1')
+      || checkMail($('mail3').value, $('mail4').value, 'メールアドレス2');
+    var any = /^[0-9]+$/.test(tel) && $('mob1').value && $('mob2').value && $('mob3').value || $('mail1').value || $('mail3').value;
+    if (!msg && !any) msg = '少なくとも、1つは連絡先を入れてください。';
+    demoAlert(msg || '（デモ）連絡先を変更しました。');
+    if (!msg) $('m-contact').classList.remove('open');
+    return false;
+  }
+</script>
+<footer>© まなびポータル（デモ）</footer>
+</div>
+<script src="fit.js"></script>
+
+</html>
