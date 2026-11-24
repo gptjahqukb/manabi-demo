@@ -289,12 +289,12 @@ def('price',{
 def('kanji',{steps:1,
   enter(g){
     const t=new THREE.Group();
-    t.add(new THREE.Mesh(rbox(5.2,6.4,.34,.5),mat(0x1b1d22,{roughness:.25})));
-    loadImg('img/kanji.jpg').then(im=>{if(!im)return;
-      const tex=canvasTex(860,1060,(x)=>{x.fillStyle='#fff';rr(x,0,0,860,1060,46);x.fill();x.save();rr(x,0,0,860,1060,46);x.clip();x.drawImage(im,0,10,860,1040);x.restore();});
-      const f=plane(4.8,5.92,tex); f.position.z=.172; t.add(f);});
-    t.position.set(-3.6,-12,0); t.rotation.set(-.2,.55,.08); g.add(shade(t));
-    tw(1.6,p=>{t.position.y=lerp(-12,-.1,p);t.rotation.y=lerp(1.6,.42,p);},{ease:E.out,delay:.1});
+    t.add(new THREE.Mesh(rbox(3.62,6.1,.32,.55),mat(0x1b1d22,{roughness:.25})));
+    loadImg('img/kanji-phone.jpg').then(im=>{if(!im)return;
+      const tex=canvasTex(780,1328,(x)=>{x.save();rr(x,0,0,780,1328,84);x.clip();x.drawImage(im,0,0,780,1328);x.restore();});
+      const f=plane(3.38,5.76,tex); f.position.z=.162; t.add(f);});
+    t.position.set(-3.4,-12,0); t.rotation.set(-.06,.3,.03); g.add(shade(t));
+    tw(1.6,p=>{t.position.y=lerp(-12,-.1,p);t.rotation.y=lerp(1.6,.28,p);},{ease:E.out,delay:.1});
     // 浮かぶ筆（ペン）
     const pen=new THREE.Group();
     const body=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,3.4,32),mat(C.coral)); pen.add(body);
@@ -304,7 +304,7 @@ def('kanji',{steps:1,
     tw(1.4,p=>{pen.position.y=lerp(8,.9,p);},{delay:.8,ease:E.back});
   },
   step(n,g){},
-  tick(t,g){const [tab,pen]=g.children; if(t>1.7){tab.rotation.y=.42+Math.sin((t-1.7)*w(.5))*.08-parallax.x*.2;tab.rotation.x=-.18+parallax.y*.1;}
+  tick(t,g){const [tab,pen]=g.children; if(t>1.7){tab.rotation.y=.28+Math.sin((t-1.7)*w(.5))*.06-parallax.x*.2;tab.rotation.x=-.06+parallax.y*.1;}
     if(pen&&t>2.2){pen.position.x=.2+Math.sin(t*w(2.2))*.35;pen.position.y=.9+Math.sin(t*w(4.4))*.18;pen.rotation.z=.6+Math.sin(t*w(2.2))*.08;}}
 });
 
@@ -451,7 +451,7 @@ function frame(noRender){
   if(!noRender) R.render(scene,cam);
 }
 function loop(){frame(); if(!window.__REC) requestAnimationFrame(loop);}
-window.__deck={get group(){return group},R,scene,cam,frame,next,show,count:S.length,steps:i=>S[i].steps,preload:()=>Promise.all(['kanji.jpg','chatgpt.png','gemini.png','claude.png','muse.png'].map(n=>loadImg('img/'+n)))};
+window.__deck={get group(){return group},R,scene,cam,frame,next,show,count:S.length,steps:i=>S[i].steps,preload:()=>Promise.all(['kanji-phone.jpg','chatgpt.png','gemini.png','claude.png','muse.png'].map(n=>loadImg('img/'+n)))};
 const start=parseInt((location.hash.match(/^#s(\d+)$/)||[])[1]||'1',10)-1;
 show(Math.min(Math.max(0,start),S.length-1)); loop();
 })();
