@@ -79,7 +79,12 @@ body{font-family:var(--body);-webkit-tap-highlight-color:transparent;user-select
 @keyframes blink{50%{opacity:0}}
 
 /* 共通 */
-.blackout{position:absolute;inset:0;background:#000;z-index:5;transform:none!important;transition:opacity 1.8s ease!important}
+/* 種明かし：暗転してから、黒い画面に白い文字 */
+#stage{transition:background-color 1.2s ease}
+#stage.dark{background:#000}
+#stage.dark .reveal{color:#fff}
+#stage.dark .caret{background:#fff}
+html.rec #stage{transition:none}
 #sponsor{position:absolute;right:40px;bottom:28px;font-size:24px;font-weight:700;color:var(--mute);letter-spacing:.04em;transition:color .6s}
 #sponsor.hot{color:var(--coral)}
 #bar{position:absolute;left:0;bottom:0;height:6px;background:var(--ink);transition:width .6s cubic-bezier(.2,.8,.2,1)}
@@ -141,7 +146,6 @@ html.rec .names,html.rec #fs,html.rec #bar{display:none}
 
   <section class="s" data-name="reveal">
     <div class="abs disp reveal"><span id="typed"></span><span class="caret"></span></div>
-    <div class="blackout" data-step="1"></div>
   </section>
 
   <div id="sponsor">※この発表は、月額プランの提供でお送りしています</div>
@@ -392,13 +396,13 @@ def('button',{steps:1,
     if(g.userData.top&&!g.userData.pressed) g.userData.top.scale.setScalar(1+Math.max(0,Math.sin(t*w(3)))*.015);}
 });
 
-def('reveal',{steps:1,
+def('reveal',{
   enter(){
     const el=document.getElementById('typed'), txt='この発表は、すべてAIによる台本です。'; el.textContent='';
-    let i=0; tw(txt.length*.11,p=>{const n=Math.round(txt.length*p);if(n!==i){i=n;el.textContent=txt.slice(0,n);}},{delay:.9,ease:p=>p,tag:'ui'});
-    document.getElementById('sponsor').classList.add('hot');
+    let i=0; tw(txt.length*.11,p=>{const n=Math.round(txt.length*p);if(n!==i){i=n;el.textContent=txt.slice(0,n);}},{delay:1.4,ease:p=>p,tag:'ui'});
+    document.getElementById('sponsor').classList.add('hot'); stage.classList.add('dark');
   },
-  leave(){document.getElementById('sponsor').classList.remove('hot');}
+  leave(){document.getElementById('sponsor').classList.remove('hot'); stage.classList.remove('dark');}
 });
 
 /* ---------- 進行 ---------- */
